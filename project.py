@@ -5,18 +5,86 @@ from datetime import datetime
 CATEGORIES = ['Food', 'Transport', 'Bills',
               'Entertainment', 'Shopping', 'Healthcare', 'Other']
 
-EXPENSE_FILE = 'expenses.csv'
+EXPENSE_FILE = 'expenses.csv'  # dont like using this variable yet, may delete
 
 # recuerda ver los videos y archivos previos de file I/O de cs50
 
 
 def main():
-    ...
-    # menu with options
+    while True:
+        print("\n--- Expense Tracker Menu ---")
+        print("1: Add New Expense")
+        print("2: View All Expenses")
+        print("3: View Total Expenses")
+        print("4: View Expenses by Category")
+        print("Q: Quit")
+        print("----------------------------")
+        choice = input("What would you like to do? ").strip().upper()
+        if choice == "Q":
+            print("Exiting programm. Goodbye!")
+            sys.exit()
+        elif choice == "1":
+            add_expense()
+        elif choice == "2":
+            load_expenses()
 
-    # def add_expense(date, amount, category, description):
-    #     """adds new expenses"""
-    #     ...
+        # add menu options here, as they come.
+        else:
+            print("Invalid option, try again.")
+
+
+def add_expense():
+    """adds new expenses on user input"""
+    # get date and validate format. may need to change to US format.
+    while True:
+        date = input("Enter date (DD-MM-YYYY)").strip()
+        if not date:
+            date = datetime.now().strftime('%d-%m-%y')
+            break
+        try:
+            datetime.strptime(date, '%d-%m-%Y')
+            break
+        except ValueError:
+            print("Invalid date format. Please use DD-MM-YYYY.")
+
+    # get amount
+    while True:
+        try:
+            amount = float(input("Enter amount: ").strip())
+            if amount <= 0:
+                print("Must be positive.")
+                continue
+            break
+        except ValueError:
+            print("Invalid amount. please enter a valid value")
+
+    # get categrory
+    for i, _ in enumerate(CATEGORIES, 1):
+        print(f"Categories are: [{i}] {_} ")
+    while True:
+        choice = input("Enter category number: ").strip()
+        try:
+            index = int(choice) - 1
+            if 0 <= index < len(CATEGORIES):
+                category = CATEGORIES[index]
+                break
+            else:
+                print("Invalid category number.")
+        except ValueError:
+            print("Please enter a number.")
+
+    # get description
+    description = input("enter description: ").strip()
+
+    try:
+        with open("expenses.csv", "a", newline='') as file:
+            writer = csv.DictWriter(
+                file, fieldnames=["date", "amount", "category", "description"])
+            writer.writerow({"date": date, "amount": amount,
+                            "category": category, "description": description})
+            print(f"Expense added: {date} {amount} {category} {description}")
+    except FileNotFoundError:
+        sys.exit("File does not exist")
 
 
 def load_expenses():
@@ -29,8 +97,6 @@ def load_expenses():
                     f"Date: {row['date']}, Amount: {row['amount']}, Category: {row['category']}, Description: {row['description']}")
     except FileNotFoundError:
         sys.exit("File does not exist")
-
-# load_expenses() testing function
 
 
 def total_expenses():
@@ -53,7 +119,7 @@ def view_by_category():
 
     expenses_by_category = {cat: [] for cat in CATEGORIES}
     try:
-        with open(EXPENSE_FILE, 'r') as file:
+        with open("expenses.csv", 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 category = row['category']
@@ -76,7 +142,9 @@ def view_by_category():
         print(f"Error reading CSV: {e}")
 
 
-# view_by_category() testing function
+def search_by_category():
+    """search by category"""
+    ...
 
 
 def view_by_date():
@@ -94,6 +162,10 @@ def add_category():
     ...
 
 
-if __name__ == "__main__":
+def delete_expense():
+    """deletes selected expense"""
+    ...
 
+
+if __name__ == "__main__":
     main()
