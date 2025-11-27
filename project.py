@@ -12,11 +12,12 @@ EXPENSE_FILE = 'expenses.csv'  # dont like using this variable yet, may delete
 
 def main():
     while True:
-        print("\n--- Expense Tracker Menu ---")
+        print("\n---- Expense Tracker Menu ----")
         print("1: Add New Expense")
         print("2: View All Expenses")
         print("3: View Total Expenses")
         print("4: View Expenses by Category")
+        print("5: Search by Category")
         print("Q: Quit")
         print("----------------------------")
         choice = input("What would you like to do? ").strip().upper()
@@ -27,6 +28,12 @@ def main():
             add_expense()
         elif choice == "2":
             load_expenses()
+        elif choice == "3":
+            total_expenses()
+        elif choice == "4":
+            view_by_category()
+        elif choice == "5":
+            search_by_category()
 
         # add menu options here, as they come.
         else:
@@ -144,7 +151,19 @@ def view_by_category():
 
 def search_by_category():
     """search by category"""
-    ...
+    print(f"These are the available categories: {CATEGORIES}. ")
+    search_cat = input(
+        "Wich category to you want to search? ").strip().capitalize()
+    try:
+        with open("expenses.csv", 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row['category'].capitalize() == search_cat:
+                    print(
+                        f"Date: {row['date']}, Amount: {row['amount']}, Description: {row['description']}")
+
+    except FileNotFoundError:
+        sys.exit("File does not exist")
 
 
 def view_by_date():
