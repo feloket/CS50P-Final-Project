@@ -5,6 +5,7 @@ from datetime import datetime
 CATEGORIES = ['Food', 'Transport', 'Bills',
               'Entertainment', 'Shopping', 'Healthcare', 'Other']
 
+
 EXPENSE_FILE = 'expenses.csv'  # dont like using this variable yet, may delete
 
 # recuerda ver los videos y archivos previos de file I/O de cs50
@@ -12,28 +13,96 @@ EXPENSE_FILE = 'expenses.csv'  # dont like using this variable yet, may delete
 
 def main():
     while True:
-        print("\n---- Expense Tracker Menu ----")
+        print(3*"-" "Expense Tracker Menu" 3*"-")
         print("1: Add New Expense")
-        print("2: View All Expenses")
-        print("3: View Total Expenses")
-        print("4: View Expenses by Category")
-        print("5: Search by Category")
-        print("Q: Quit")
-        print("----------------------------")
+        print("2: View & Search Expenses")
+        print("3: Reports & Tools (Total/Excel)")
+        print("4: Manage Categories")
+        # add future options here "6: Delete Expense"
+        print("Q: Quit Program")
+        print(10*"=")
+        # get user choice
         choice = input("What would you like to do? ").strip().upper()
         if choice == "Q":
             print("Exiting programm. Goodbye!")
             sys.exit()
+        # add expense
         elif choice == "1":
             add_expense()
         elif choice == "2":
-            load_expenses()
+            while True:
+                print(3*"-"+"View & search menu"+3*"-")
+                print("1: View All Expenses (List)")
+                print("2: View Expenses by Category (Grouped List)")
+                print("3: Search by Specific Category")
+                print("4: Search by Date")
+                print("5: Delete Expense")  # may put the delete function here
+                print("R: Return to Main Menu")
+                print(10*"=")
+                # get use input
+                choice_2 = input("Enter view/search choice: ").strip().upper()
+                if choice_2 == "R":
+                    break  # Exit loop, returns to main menu
+                # view expense list
+                elif choice_2 == "1":
+                    load_expenses()
+                # view by category
+                elif choice_2 == "2":
+                    view_by_category()
+                # view by specific category
+                elif choice_2 == "3":
+                    search_by_category()
+                # view by date
+                elif choice_2 == "4":
+                    view_by_date()
+                # deletes specific expense
+                elif choice_2 == "5":
+                    delete_expense()
+                else:
+                    print("Invalid option!, try again")
         elif choice == "3":
-            total_expenses()
+            while True:
+                print(3*"-"+"Reports & Tools Menu" + 3*"-")
+                print("1: View Total Expenses (Sum)")
+                print("2: Generate Excel Report")
+                print("R: Return to Main Menu")
+                print(10*"-")
+
+                choice_3 = input(
+                    "Enter reports/tools choice: ").strip().upper()
+
+                if choice_3 == "R":
+                    break  # Exit loop, returns to main menu
+                #  view sumed expenses
+                elif choice_3 == "1":
+                    total_expenses()
+                # need to finish this function
+                elif choice_3 == "2":
+                    generate_excel_report()
+                else:
+                    print("Invalid option!, try again")
+
         elif choice == "4":
-            view_by_category()
-        elif choice == "5":
-            search_by_category()
+            while True:
+                print(3*"-"+"Category Management Menu" + 3*"-")
+                print("1: Add New Category")
+                print("2: View Available Categories")
+                print("R: Return to Main Menu")
+                print(10*"-")
+
+                choice_4 = input("Enter category choice: ").strip().upper()
+
+                if choice_4 == "R":
+                    break  # Exit loop, returns to main menu
+                # adds new category
+                elif choice_4 == "1":
+                    add_category()
+                # prints categories
+                elif choice_4 == "2":
+                    for category in CATEGORIES:
+                        print(f"Category: {category}")
+                else:
+                    print("Invalid option!, try again")
 
         # add menu options here, as they come.
         else:
@@ -84,7 +153,7 @@ def add_expense():
     description = input("enter description: ").strip()
 
     try:
-        with open("expenses.csv", "a", newline='') as file:
+        with open("expenses.csv", "a", newline='', encoding='utf-8') as file:
             writer = csv.DictWriter(
                 file, fieldnames=["date", "amount", "category", "description"])
             writer.writerow({"date": date, "amount": amount,
@@ -97,7 +166,7 @@ def add_expense():
 def load_expenses():
     """reads from csv file"""
     try:
-        with open("expenses.csv", "r") as file:
+        with open("expenses.csv", "r", newline='', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 print(
@@ -107,10 +176,10 @@ def load_expenses():
 
 
 def total_expenses():
-    """displays total expenses"""
+    """displays sumed total of expenses"""
     try:
         total = 0
-        with open("expenses.csv", "r") as file:
+        with open("expenses.csv", "r", newline='', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 total += float(row['amount'])
@@ -126,7 +195,7 @@ def view_by_category():
 
     expenses_by_category = {cat: [] for cat in CATEGORIES}
     try:
-        with open("expenses.csv", 'r') as file:
+        with open("expenses.csv", 'r', newline='', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 category = row['category']
@@ -155,7 +224,7 @@ def search_by_category():
     search_cat = input(
         "Wich category to you want to search? ").strip().capitalize()
     try:
-        with open("expenses.csv", 'r') as file:
+        with open("expenses.csv", 'r', newline='', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 if row['category'].capitalize() == search_cat:
@@ -168,11 +237,122 @@ def search_by_category():
 
 def view_by_date():
     """display expenses by date"""
-    ...
+    # get and  validate date
+    print("\nOptions: ")
+    print("1: Search by day")
+    print("2: Search by month")
+    print("3: Search by year")
+    print("R: return to previus menu ")
+    while True:
+        choice = input("Enter your choice: ").strip().upper()
+        # returns to previus menu
+        if choice == "R":
+            return
+        elif choice == "1":
+            search_by_day()
+        elif choice == "2":
+            search_by_month()
+        elif choice == "3":
+            search_by_year()
+        else:
+            print("Invalid option!, try again.")
+
+
+def search_by_day():
+    """search expenses by specific day"""
+    while True:
+        try:
+            # ask the user for date input
+            day = input("Enter day (1-31): ").strip()
+            month = input("Enter month (1-12): ").strip()
+            year = input("Enter year (YYYY): ").strip()
+            # validate and format date
+            date = datetime(int(year), int(month), int(day))
+            search_date = date.strftime('%d-%m-%Y')
+            with open("expenses.csv", 'r', newline='', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    if row['date'] == search_date:
+                        print(
+                            f"Date: {row['date']}, Amount: {row['amount']}, Description: {row['description']}")
+        except ValueError as e:
+            print(f"Invalid date! {e}")
+        except FileNotFoundError:
+            sys.exit("File does not exist")
+        except KeyError:
+            print("date' column not found in CSV!")
+            break
+
+
+def search_by_month():  # dont need datetime for non dd-mm-yyyy formats!
+    """search expenses by specific month"""
+    while True:
+        try:
+            # ask the user for date input
+            month = input("Enter month (1-12): ").strip()
+            year = input("Enter year (YYYY): ").strip()
+
+            # validate month and year
+            if not (month.isdigit() and 1 <= int(month) <= 12):
+                print("Invalid month! Must be 1–12.")
+                continue
+
+            if len(year) != 4 or not year.isdigit():
+                print("Invalid year! Use YYYY.")
+                continue
+
+            # format month to MM format
+            month = f"{int(month):02d}"
+
+            with open("expenses.csv", 'r', newline='', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    day, row_month, row_year = row['date'].split('-')
+                    if row_month == month and row_year == year:
+                        print(
+                            f"Date: {row['date']}, Amount: {row['amount']}, Description: {row['description']}"
+                        )
+        except ValueError as e:
+            print(f"Invalid date! {e}")
+        except FileNotFoundError:
+            sys.exit("File does not exist")
+        except KeyError:
+            print("date' column not found in CSV!")
+        break
+
+
+def search_by_year():  # dont need datetime for non dd-mm-yyyy formats!
+    """search expenses by specific year"""
+    while True:
+        try:
+            # ask the user for date input
+            year = input("Enter year (YYYY): ").strip()
+
+            # validate year
+            if len(year) != 4 or not year.isdigit():
+                print("Invalid year! Use YYYY.")
+                continue
+
+            with open("expenses.csv", 'r', newline='', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    day, month, row_year = row['date'].split('-')
+                    if row_year == year:
+                        print(
+                            f"Date: {row['date']}, Amount: {row['amount']}, Description: {row['description']}"
+                        )
+        except ValueError as e:
+            print(f"Invalid date! {e}")
+        except FileNotFoundError:
+            sys.exit("File does not exist")
+        except KeyError:
+            print("date' column not found in CSV!")
+        break
 
 
 def generate_excel_report():
     """uses csv excel class to generate an excel report"""
+    # i want to call this function when the users selectsa a menu option and ask if he wants to export to excel
     ...
 
 
