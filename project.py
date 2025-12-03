@@ -358,12 +358,20 @@ def generate_excel_report():
 
 def add_category():
     """adds new category to categories list"""
-    ...
+    new_category = input("Enter new category: ").strip().Capitalize()
+    CATEGORIES.append(new_category)
 
 
 def delete_expense():
     """deletes selected expense"""
-    ...
+    try:
+        date_del =
+    get the user input
+    verify it exists with dictreader
+    delete the matching EXPENnse
+    if not found print error
+    print the users action complete
+    return to main menu
 
 
 if __name__ == "__main__":
