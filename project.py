@@ -10,7 +10,7 @@ FIELDNAMES = ["date", "amount", "category", "description"]
 EXPENSE_FILE = 'expenses.csv'  # dont like using this variable yet, may delete
 
 # recuerda ver los videos y archivos previos de file I/O de cs50
-
+# recuerda ver videos de la libreria os
 
 def main():
     while True:
@@ -368,9 +368,9 @@ def delete_expense():
     """deletes selected expense""" 
     # get date 
     while True:
-        date = input("Enter date to delete (DD-MM-YYYY)").strip()
+        date = input("Enter date to delete (DD-MM-YYYY): ").strip()
         if not date:
-            date = datetime.now().strftime('%d-%m-%y')
+            date = datetime.now().strftime('%d-%m-%Y')
             break
         try:
             datetime.strptime(date, '%d-%m-%Y')
@@ -406,34 +406,44 @@ def delete_expense():
 
     # get description
     description = input("enter description: ").strip()
+    
     # csv doesnt handle row deletion
-    # must createa  new file without the selected row!
-    row_deleting = {'date': date, 'amount': amount, 'category': category, 'description': description } 
+    # must create a new file without the selected row!
     filename = 'expenses.csv'
     temp_file = filename + '.tmp'
-    FIELDNAMES = ["date", "amount", "category", "description"]
     deleted = False
+    
     try:
-        with open(filename,'r', newline='', encoding='utf-8') as oldfile:
-            reader = csv.DictReader(oldfile, fieldnames=FIELDNAMES)
-        with open(temp_file,'w', newline='', encoding='utf-8') as newfile:
+        # had to merge this together.
+        with open(filename, 'r', newline='', encoding='utf-8') as oldfile, \
+             open(temp_file, 'w', newline='', encoding='utf-8') as newfile:
+            
+            reader = csv.DictReader(oldfile)
             writer = csv.DictWriter(newfile, fieldnames=FIELDNAMES)
-        writer.writeheader()
-        for _, row in enumerate(reader):
-            if _ == 0 and all(row.get(field) == field for field in FIELDNAMES):
-                continue
-            row_comparison = row.copy()
-            if row_comparison == row_deleting and not deleted:
-                deleted = True
-                print("Expense found")
-                continue
-            writer.writerow(row)
+            writer.writeheader()
+            
+            for row in reader:
+                # debug print to see what we're comparing
+                print(f"Checking: date={row['date']}, amount={row['amount']}, category={row['category']}, desc={row['description']}")
+                
+                # compare with normalized values
+                if (row['date'] == date and 
+                    float(row['amount']) == amount and 
+                    row['category'] == category and 
+                    row['description'] == description and 
+                    not deleted):
+                    deleted = True
+                    print("Expense found and will be deleted!")
+                    continue
+                writer.writerow(row)
+        
         if deleted:
             os.replace(temp_file, filename)
             print("Expense removed")
         else:
             os.remove(temp_file)
-            print("Expense not found in file")
+            print("Expense not found in file.")
+            
     except FileNotFoundError:
         sys.exit("File does not exist")
         
