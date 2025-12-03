@@ -1,11 +1,12 @@
 import csv
 import sys  # will use this to brake out of loops
+import os # file operations 
 from datetime import datetime
 
 CATEGORIES = ['Food', 'Transport', 'Bills',
               'Entertainment', 'Shopping', 'Healthcare', 'Other']
 
-
+FIELDNAMES = ["date", "amount", "category", "description"]
 EXPENSE_FILE = 'expenses.csv'  # dont like using this variable yet, may delete
 
 # recuerda ver los videos y archivos previos de file I/O de cs50
@@ -13,7 +14,7 @@ EXPENSE_FILE = 'expenses.csv'  # dont like using this variable yet, may delete
 
 def main():
     while True:
-        print(3*"-" "Expense Tracker Menu" 3*"-")
+        print(3*"-"+"Expense Tracker Menu"+3*"-")
         print("1: Add New Expense")
         print("2: View & Search Expenses")
         print("3: Reports & Tools (Total/Excel)")
@@ -353,26 +354,89 @@ def search_by_year():  # dont need datetime for non dd-mm-yyyy formats!
 def generate_excel_report():
     """uses csv excel class to generate an excel report"""
     # i want to call this function when the users selectsa a menu option and ask if he wants to export to excel
+    # might delete, must lear pandas or something else for this. :,c
     ...
 
 
 def add_category():
     """adds new category to categories list"""
-    new_category = input("Enter new category: ").strip().Capitalize()
+    new_category = input("Enter new category: ").strip().capitalize()
     CATEGORIES.append(new_category)
 
 
 def delete_expense():
-    """deletes selected expense"""
-    try:
-        date_del =
-    get the user input
-    verify it exists with dictreader
-    delete the matching EXPENnse
-    if not found print error
-    print the users action complete
-    return to main menu
+    """deletes selected expense""" 
+    # get date 
+    while True:
+        date = input("Enter date to delete (DD-MM-YYYY)").strip()
+        if not date:
+            date = datetime.now().strftime('%d-%m-%y')
+            break
+        try:
+            datetime.strptime(date, '%d-%m-%Y')
+            break
+        except ValueError:
+            print("Invalid date format. Please use DD-MM-YYYY.")
 
+    # get amount
+    while True:
+        try:
+            amount = float(input("Enter amount to be deleted: ").strip())
+            if amount <= 0:
+                print("Must be positive.")
+                continue
+            break
+        except ValueError:
+            print("Invalid amount. please enter a valid value")
+
+    # get categrory
+    for i, _ in enumerate(CATEGORIES, 1):
+        print(f"Categories are: [{i}] {_} ")
+    while True:
+        choice = input("Enter category number: ").strip()
+        try:
+            index = int(choice) - 1
+            if 0 <= index < len(CATEGORIES):
+                category = CATEGORIES[index]
+                break
+            else:
+                print("Invalid category number.")
+        except ValueError:
+            print("Please enter a number.")
+
+    # get description
+    description = input("enter description: ").strip()
+    # csv doesnt handle row deletion
+    # must createa  new file without the selected row!
+    row_deleting = {'date': date, 'amount': amount, 'category': category, 'description': description } 
+    filename = 'expenses.csv'
+    temp_file = filename + '.tmp'
+    FIELDNAMES = ["date", "amount", "category", "description"]
+    deleted = False
+    try:
+        with open(filename,'r', newline='', encoding='utf-8') as oldfile:
+            reader = csv.DictReader(oldfile, fieldnames=FIELDNAMES)
+        with open(temp_file,'w', newline='', encoding='utf-8') as newfile:
+            writer = csv.DictWriter(newfile, fieldnames=FIELDNAMES)
+        writer.writeheader()
+        for _, row in enumerate(reader):
+            if _ == 0 and all(row.get(field) == field for field in FIELDNAMES):
+                continue
+            row_comparison = row.copy()
+            if row_comparison == row_deleting and not deleted:
+                deleted = True
+                print("Expense found")
+                continue
+            writer.writerow(row)
+        if deleted:
+            os.replace(temp_file, filename)
+            print("Expense removed")
+        else:
+            os.remove(temp_file)
+            print("Expense not found in file")
+    except FileNotFoundError:
+        sys.exit("File does not exist")
+        
 
 if __name__ == "__main__":
     main()
