@@ -1,6 +1,6 @@
 import csv
 import sys  # will use this to brake out of loops
-import os # file operations 
+import os  # file operations
 from datetime import datetime
 
 CATEGORIES = ['Food', 'Transport', 'Bills',
@@ -11,6 +11,7 @@ EXPENSE_FILE = 'expenses.csv'  # dont like using this variable yet, may delete
 
 # recuerda ver los videos y archivos previos de file I/O de cs50
 # recuerda ver videos de la libreria os
+
 
 def main():
     while True:
@@ -116,7 +117,7 @@ def add_expense():
     while True:
         date = input("Enter date (DD-MM-YYYY)").strip()
         if not date:
-            date = datetime.now().strftime('%d-%m-%y')
+            date = datetime.now().strftime('%d-%m-%Y')
             break
         try:
             datetime.strptime(date, '%d-%m-%Y')
@@ -127,7 +128,7 @@ def add_expense():
     # get amount
     while True:
         try:
-            amount = float(input("Enter amount: ").strip())
+            amount = int(input("Enter amount: ").strip())
             if amount <= 0:
                 print("Must be positive.")
                 continue
@@ -183,7 +184,7 @@ def total_expenses():
         with open("expenses.csv", "r", newline='', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                total += float(row['amount'])
+                total += int(row['amount'])
 
         print(f"Total expenses: ${total:.2f}")
         return total
@@ -210,7 +211,7 @@ def view_by_category():
                 for expense in expenses:
                     date = expense.get('date', 'N/A')
                     desc = expense.get('description', 'N/A')
-                    amount = float(expense.get('amount', 0))
+                    amount = int(expense.get('amount', 0))
                     print(f"  {date:<12} {desc:<30} ${amount:>8.2f}")
 
     except FileNotFoundError:
@@ -251,10 +252,13 @@ def view_by_date():
             return
         elif choice == "1":
             search_by_day()
+            return
         elif choice == "2":
             search_by_month()
+            return
         elif choice == "3":
             search_by_year()
+            return
         else:
             print("Invalid option!, try again.")
 
@@ -276,6 +280,7 @@ def search_by_day():
                     if row['date'] == search_date:
                         print(
                             f"Date: {row['date']}, Amount: {row['amount']}, Description: {row['description']}")
+            break
         except ValueError as e:
             print(f"Invalid date! {e}")
         except FileNotFoundError:
@@ -313,13 +318,14 @@ def search_by_month():  # dont need datetime for non dd-mm-yyyy formats!
                         print(
                             f"Date: {row['date']}, Amount: {row['amount']}, Description: {row['description']}"
                         )
+            break
         except ValueError as e:
             print(f"Invalid date! {e}")
         except FileNotFoundError:
             sys.exit("File does not exist")
         except KeyError:
             print("date' column not found in CSV!")
-        break
+            break
 
 
 def search_by_year():  # dont need datetime for non dd-mm-yyyy formats!
@@ -342,13 +348,14 @@ def search_by_year():  # dont need datetime for non dd-mm-yyyy formats!
                         print(
                             f"Date: {row['date']}, Amount: {row['amount']}, Description: {row['description']}"
                         )
+            break
         except ValueError as e:
             print(f"Invalid date! {e}")
         except FileNotFoundError:
             sys.exit("File does not exist")
         except KeyError:
             print("date' column not found in CSV!")
-        break
+            break
 
 
 def generate_excel_report():
@@ -365,8 +372,8 @@ def add_category():
 
 
 def delete_expense():
-    """deletes selected expense""" 
-    # get date 
+    """deletes selected expense"""
+    # get date
     while True:
         date = input("Enter date to delete (DD-MM-YYYY): ").strip()
         if not date:
@@ -381,7 +388,7 @@ def delete_expense():
     # get amount
     while True:
         try:
-            amount = float(input("Enter amount to be deleted: ").strip())
+            amount = int(input("Enter amount to be deleted: ").strip())
             if amount <= 0:
                 print("Must be positive.")
                 continue
@@ -406,47 +413,44 @@ def delete_expense():
 
     # get description
     description = input("enter description: ").strip()
-    
+
     # csv doesnt handle row deletion
     # must create a new file without the selected row!
     filename = 'expenses.csv'
     temp_file = filename + '.tmp'
     deleted = False
-    
+
     try:
         # had to merge this together.
         with open(filename, 'r', newline='', encoding='utf-8') as oldfile, \
-             open(temp_file, 'w', newline='', encoding='utf-8') as newfile:
-            
+                open(temp_file, 'w', newline='', encoding='utf-8') as newfile:
+
             reader = csv.DictReader(oldfile)
             writer = csv.DictWriter(newfile, fieldnames=FIELDNAMES)
             writer.writeheader()
-            
+
             for row in reader:
-                # debug print to see what we're comparing
-                print(f"Checking: date={row['date']}, amount={row['amount']}, category={row['category']}, desc={row['description']}")
-                
-                # compare with normalized values
-                if (row['date'] == date and 
-                    float(row['amount']) == amount and 
-                    row['category'] == category and 
-                    row['description'] == description and 
-                    not deleted):
+                # skip the row that matches all fields
+                if (row['date'] == date and
+                    int(row['amount']) == amount and
+                    row['category'] == category and
+                    row['description'] == description and
+                        not deleted):
                     deleted = True
                     print("Expense found and will be deleted!")
-                    continue
-                writer.writerow(row)
-        
+                else:
+                    writer.writerow(row)
+
         if deleted:
             os.replace(temp_file, filename)
             print("Expense removed")
         else:
             os.remove(temp_file)
             print("Expense not found in file.")
-            
+
     except FileNotFoundError:
         sys.exit("File does not exist")
-        
+
 
 if __name__ == "__main__":
     main()
